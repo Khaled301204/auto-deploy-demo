@@ -7,16 +7,9 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                // Clone the public repo
-                sh 'git clone https://github.com/Khaled301204/auto-deploy-demo.git .'
-            }
-        }
-
+        // No need for a Checkout stage if using Pipeline from SCM
         stage('Install Netlify CLI') {
             steps {
-                // Install Node.js & Netlify CLI
                 sh '''
                 curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
                 apt-get install -y nodejs
@@ -27,7 +20,6 @@ pipeline {
 
         stage('Deploy to Netlify') {
             steps {
-                // Deploy the static site
                 sh 'netlify deploy --dir=. --prod'
             }
         }
