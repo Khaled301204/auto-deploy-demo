@@ -9,18 +9,25 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Khaled301204/auto-deploy-demo.git'
+                // Clone the public repo
+                sh 'git clone https://github.com/Khaled301204/auto-deploy-demo.git .'
             }
         }
 
         stage('Install Netlify CLI') {
             steps {
-                sh 'npm install -g netlify-cli'
+                // Install Node.js & Netlify CLI
+                sh '''
+                curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+                apt-get install -y nodejs
+                npm install -g netlify-cli
+                '''
             }
         }
 
         stage('Deploy to Netlify') {
             steps {
+                // Deploy the static site
                 sh 'netlify deploy --dir=. --prod'
             }
         }
