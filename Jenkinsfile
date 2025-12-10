@@ -1,13 +1,7 @@
 pipeline {
-    // Use a Node.js Docker image with Node pre-installed
-    agent {
-        docker {
-            image 'node:20-bullseye' 
-        }
-    }
+    agent any
 
     environment {
-        // Make sure these credentials exist in Jenkins
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
         NETLIFY_SITE_ID = credentials('netlify-site-id')
     }
@@ -15,21 +9,34 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Repo is already checked out by Pipeline from SCM
-                echo "Repo already checked out to workspace."
+                echo "Repo already checked out"
             }
         }
 
-        stage('Install Netlify CLI') {
+        stage('Install Node & Netlify CLI') {
             steps {
-                sh 'npm install -g netlify-cli'
+                sh '''
+                # Install nvm and Node.js locally
+                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash
+                export NVM_DIR="$HOME/.nvm"
+                [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                nvm install 20
+                nvm use 20
+
+                # Install Netlify CLI globally
+                npm install -g netlify-cli
+                '''
             }
         }
 
         stage('Deploy to Netlify') {
             steps {
-                // Deploy the static site
-                sh 'netlify deploy --dir=. --prod'
+                sh '''
+                export NVM_DIR="$HOME/.nvm"
+                [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                nvm use 20
+                netlify deploy --dir=. --prod
+                '''
             }
         }
     }
